@@ -1,6 +1,6 @@
 # giants
 
-A lightweight starter for building serverless services on AWS with Bun, CDK, and Lambda. Named for standing on the shoulders of.
+A lightweight starter for building serverless services on AWS with Bun, CDK and Lambda. Named for standing on the shoulders of.
 
 ## What's in the box
 
