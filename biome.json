@@ -1,0 +1,80 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.2.0/schema.json",
+  "files": {
+    "includes": [
+      "**",
+      "!**/*.js",
+      "!**/*.d.ts",
+      "!**/.turbo",
+      "!**/cdk.out",
+      "!**/coverage",
+      "!**/dist",
+      "!**/node_modules",
+      "!**/package.json"
+    ]
+  },
+  "formatter": {
+    "indentStyle": "space"
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single"
+    }
+  },
+  "linter": {
+    "rules": {
+      "complexity": {
+        "useLiteralKeys": "off",
+        "useOptionalChain": "warn"
+      },
+      "correctness": {
+        "noUnreachableSuper": "off",
+        "noUnusedVariables": "warn",
+        "noVoidTypeReturn": "off"
+      },
+      "performance": {
+        "noDelete": "off"
+      },
+      "style": {
+        "noNonNullAssertion": "off",
+        "useNamingConvention": "off",
+        "useNodejsImportProtocol": "warn",
+        "noParameterAssign": "error",
+        "useAsConstAssertion": "error",
+        "useDefaultParameterLast": "error",
+        "useEnumInitializers": "error",
+        "useSelfClosingElements": "error",
+        "useSingleVarDeclarator": "error",
+        "noUnusedTemplateLiteral": "error",
+        "useNumberNamespace": "error",
+        "noInferrableTypes": "error",
+        "noUselessElse": "error"
+      },
+      "suspicious": {
+        "noExplicitAny": "off",
+        "noRedeclare": "off",
+        "noShadowRestrictedNames": "off",
+        "useIterableCallbackReturn": "off",
+        "noConsole": {
+          "level": "error",
+          "options": {
+            "allow": ["warn", "error", "info"]
+          }
+        }
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["**/scripts/**", "**/tests/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsole": "off"
+          }
+        }
+      }
+    }
+  ],
+  "assist": { "actions": { "source": { "organizeImports": "on" } } }
+}

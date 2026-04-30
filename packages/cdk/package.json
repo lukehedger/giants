@@ -1,0 +1,14 @@
+{
+  "name": "@giants/cdk",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test:unit": "bun test"
+  },
+  "devDependencies": {
+    "aws-cdk-lib": "catalog:",
+    "constructs": "catalog:",
+    "esbuild": "catalog:"
+  }
+}

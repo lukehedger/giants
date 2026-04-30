@@ -1,0 +1,32 @@
+{
+  "name": "@giants/telemetry",
+  "version": "0.0.1",
+  "description": "Powertools logger/metrics/tracer abstraction with local no-op fallbacks for AWS Lambda.",
+  "module": "index.ts",
+  "main": "index.ts",
+  "types": "index.ts",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "files": [
+    "index.ts",
+    "instrument.ts",
+    "local.ts",
+    "powertools.ts",
+    "telemetry.ts",
+    "types.ts"
+  ],
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test:unit": "bun test"
+  },
+  "dependencies": {
+    "@aws-lambda-powertools/logger": "catalog:",
+    "@aws-lambda-powertools/metrics": "catalog:",
+    "@aws-lambda-powertools/tracer": "catalog:"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "catalog:"
+  }
+}

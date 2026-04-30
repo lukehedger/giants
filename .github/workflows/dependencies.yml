@@ -1,0 +1,87 @@
+name: dependencies
+
+on:
+  schedule:
+    - cron: '7 9 * * 1' # ~10am London, Mondays only. Offset by 7m to avoid GitHub Actions thundering herd.
+  workflow_dispatch:
+
+permissions:
+  contents: write # commit and push dependency changes
+  pull-requests: write # create or update PR
+
+jobs:
+  update:
+    name: update
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+
+      - name: Update catalog dependencies
+        run: |
+          for pkg in $(jq -r '.catalog | keys[]' package.json); do
+            latest=$(npm view "$pkg" version 2>/dev/null || echo "")
+            if [ -n "$latest" ]; then
+              jq --arg pkg "$pkg" --arg ver "$latest" '.catalog[$pkg] = $ver' package.json > tmp.json && mv tmp.json package.json
+            fi
+          done
+
+      - name: Update dependencies
+        run: bun update --latest
+
+      - name: Audit dependencies
+        id: audit
+        run: |
+          {
+            echo "report<<EOF"
+            bun audit 2>&1 | sed 's/\x1b\[[0-9;]*m//g' || true
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create or update PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AUDIT_REPORT: ${{ steps.audit.outputs.report }}
+        run: |
+          git diff --quiet -- . && echo "No dependency changes" && exit 0
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Long-lived bot-owned branch. We force-push so each weekly run
+          # rewrites it with the latest snapshot; any manual commits pushed
+          # to this branch will be discarded on the next run. Keep humans
+          # out of automated/*.
+          BRANCH="automated/dependency-updates"
+          git checkout -b "$BRANCH"
+
+          git add -u .
+          git commit -m "chore: update dependencies"
+          git push origin "$BRANCH" --force
+
+          FENCE='```'
+          {
+            echo "## Summary"
+            echo ""
+            echo "All packages updated to latest via ${FENCE}bun update --latest${FENCE}."
+            echo ""
+            echo "## Audit report"
+            echo ""
+            echo "$FENCE"
+            echo "$AUDIT_REPORT"
+            echo "$FENCE"
+          } > /tmp/pr-body.md
+
+          gh pr create \
+            --title "chore: update dependencies" \
+            --body-file /tmp/pr-body.md \
+            --base main \
+            --head "$BRANCH" \
+          || gh pr edit "$BRANCH" --body-file /tmp/pr-body.md

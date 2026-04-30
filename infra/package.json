@@ -1,0 +1,12 @@
+{
+  "name": "infra",
+  "type": "module",
+  "devDependencies": {
+    "@giants/cdk": "workspace:*",
+    "aws-cdk": "catalog:",
+    "aws-cdk-lib": "catalog:",
+    "aws-cdk-local": "catalog:",
+    "esbuild": "catalog:",
+    "zod": "catalog:"
+  }
+}

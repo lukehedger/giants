@@ -1,0 +1,11 @@
+{
+  "name": "api",
+  "type": "module",
+  "dependencies": {
+    "@giants/errors": "workspace:*",
+    "@giants/telemetry": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "catalog:"
+  }
+}

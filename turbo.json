@@ -1,0 +1,10 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "tasks": {
+    "test:unit": {
+      "cache": true,
+      "dependsOn": ["^test:unit"],
+      "inputs": ["$TURBO_DEFAULT$", "!**/.turbo/**", "!**/node_modules/**"]
+    }
+  }
+}

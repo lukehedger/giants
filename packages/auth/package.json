@@ -1,0 +1,15 @@
+{
+  "name": "@giants/auth",
+  "module": "auth.ts",
+  "exports": {
+    ".": "./auth.ts"
+  },
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test:unit": "bun test"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "catalog:"
+  }
+}

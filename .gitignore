@@ -1,0 +1,10 @@
+node_modules
+cdk.out
+dist
+.turbo
+.build
+.esbuild
+coverage
+cdk.context.json
+*.log
+.DS_Store

@@ -1,0 +1,77 @@
+name: cd
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'api/**'
+      - 'bootstrap/**'
+      - 'infra/**'
+      - 'packages/**'
+      - 'package.json'
+      - 'bun.lock'
+      - '.github/workflows/cd.yml'
+  workflow_dispatch:
+
+env:
+  AWS_REGION: 'eu-central-1'
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: cd
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: deploy
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+
+      - name: Get Bun cache info
+        id: bun-cache
+        run: |
+          echo "dir=$(bun pm cache)" >> "$GITHUB_OUTPUT"
+          echo "hash=$(bun pm hash)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@v5
+        with:
+          path: ${{ steps.bun-cache.outputs.dir }}
+          key: ${{ runner.os }}-bun-${{ steps.bun-cache.outputs.hash }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Cache CDK assets
+        uses: actions/cache@v5
+        with:
+          path: infra/cdk.out
+          # bun.lock is part of the key so a dep bump (which changes the
+          # bundled third-party code) produces a fresh bundle even when
+          # no source file changed.
+          key: ${{ runner.os }}-cdk-${{ hashFiles('api/**', 'infra/**', 'packages/**', 'bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cdk-
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6.1.0
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: GitHubActions-${{ github.job }}
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-role
+
+      - name: Deploy
+        run: bun infra/deploy.ts
