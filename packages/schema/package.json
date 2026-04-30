@@ -1,0 +1,19 @@
+{
+  "name": "@giants/schema",
+  "module": "index.ts",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test:unit": "bun test"
+  },
+  "dependencies": {
+    "@giants/errors": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "catalog:"
+  }
+}

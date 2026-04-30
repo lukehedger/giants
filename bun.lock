@@ -19,6 +19,7 @@
       "name": "api",
       "dependencies": {
         "@giants/errors": "workspace:*",
+        "@giants/schema": "workspace:*",
         "@giants/telemetry": "workspace:*",
       },
       "devDependencies": {
@@ -64,6 +65,16 @@
       "name": "@giants/errors",
       "dependencies": {
         "@giants/telemetry": "workspace:*",
+      },
+    },
+    "packages/schema": {
+      "name": "@giants/schema",
+      "dependencies": {
+        "@giants/errors": "workspace:*",
+        "zod": "catalog:",
+      },
+      "devDependencies": {
+        "@types/aws-lambda": "catalog:",
       },
     },
     "packages/secrets": {
@@ -265,6 +276,8 @@
     "@giants/config": ["@giants/config@workspace:packages/config"],
 
     "@giants/errors": ["@giants/errors@workspace:packages/errors"],
+
+    "@giants/schema": ["@giants/schema@workspace:packages/schema"],
 
     "@giants/secrets": ["@giants/secrets@workspace:packages/secrets"],
 

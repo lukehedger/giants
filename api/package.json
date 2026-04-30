@@ -3,6 +3,7 @@
   "type": "module",
   "dependencies": {
     "@giants/errors": "workspace:*",
+    "@giants/schema": "workspace:*",
     "@giants/telemetry": "workspace:*"
   },
   "devDependencies": {

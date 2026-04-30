@@ -11,6 +11,7 @@ A lightweight starter for building serverless services on AWS with Bun, CDK and 
   - `packages/telemetry/` - Powertools logger/metrics/tracer abstraction with local no-op fallbacks.
   - `packages/auth/` - Cognito `client_id` extraction helper.
   - `packages/errors/` - baseline error response shape.
+  - `packages/schema/` - Zod request/response schemas for API handlers, plus a `parseRequest` helper that returns either the typed value or a ready-to-return `ValidationError` response.
 - `infra/` - CDK app with a minimal example stack wired through the constructs.
 - `infra/local.ts` - LocalStack bootstrap for running the stack offline.
 - `api/hello.ts` - one example handler so the stack deploys a working endpoint out of the box.
