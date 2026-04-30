@@ -34,6 +34,24 @@ describe('mapErrorToResponse', () => {
     const body = JSON.parse(res.body);
     expect(logger.appendKeys).toHaveBeenCalledWith({ errorId: body.errorId });
   });
+
+  test('appends errorId BEFORE logging so the ERROR line carries it too', () => {
+    const order: string[] = [];
+    const logger: TelemetryLogger = {
+      debug: mock(() => {}),
+      info: mock(() => {}),
+      warn: mock(() => {}),
+      resetKeys: mock(() => {}),
+      appendKeys: mock(() => {
+        order.push('appendKeys');
+      }),
+      error: mock(() => {
+        order.push('error');
+      }),
+    };
+    mapErrorToResponse(new Error('boom'), logger);
+    expect(order).toEqual(['appendKeys', 'error']);
+  });
 });
 
 describe('validationErrorResponse', () => {

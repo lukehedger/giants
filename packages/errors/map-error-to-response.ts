@@ -23,11 +23,11 @@ export const mapErrorToResponse = (
 ): ErrorResponse => {
   const errorId = randomUUID();
 
-  logger.error('mapErrorToResponse', error as Error);
-  // Append errorId so the wide-event emitted at end-of-invocation carries
-  // the same id that's in the response body — lets clients quote errorId
-  // when asking for diagnostics.
+  // Append errorId before logging so the ERROR line itself carries the id
+  // the client will see in the response body — plus every subsequent log
+  // in the invocation, including the end-of-invocation wide-event.
   logger.appendKeys({ errorId });
+  logger.error('mapErrorToResponse', error as Error);
 
   return respond(500, {
     errorId,

@@ -45,4 +45,32 @@ describe('powertoolsSecrets', () => {
 
     expect(result).toEqual(expected);
   });
+
+  test('runs the raw value through an optional schema', async () => {
+    const raw = { clientId: 'id', clientSecret: 'secret' };
+    mockGetSecret.mockResolvedValueOnce(raw);
+    const secrets = powertoolsSecrets();
+
+    const schema = {
+      parse: mock((input: unknown) => input as typeof raw),
+    };
+    const result = await secrets.getSecret('my/secret', schema);
+
+    expect(schema.parse).toHaveBeenCalledWith(raw);
+    expect(result).toEqual(raw);
+  });
+
+  test('propagates schema parse errors', async () => {
+    mockGetSecret.mockResolvedValueOnce({ clientId: 1 });
+    const secrets = powertoolsSecrets();
+    const schema = {
+      parse: () => {
+        throw new Error('bad shape');
+      },
+    };
+
+    await expect(secrets.getSecret('my/secret', schema)).rejects.toThrow(
+      'bad shape',
+    );
+  });
 });

@@ -73,8 +73,9 @@ export class Example extends Stack {
         path: 'hello',
         description: 'Hello world',
         memory: 128,
-        tableAccess: 'read',
         timeout: 10,
+        // Defaults to read-only DynamoDB access. Handlers that need to
+        // write should set `tableAccess: 'readwrite'`.
       },
     ];
 

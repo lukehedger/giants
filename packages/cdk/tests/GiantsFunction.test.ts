@@ -131,7 +131,28 @@ describe('GiantsFunction', () => {
     });
   });
 
-  test('grants DynamoDB read/write by default when table prop is set', () => {
+  const collectActions = (template: Template): Set<string> => {
+    const policies = template.findResources('AWS::IAM::Policy');
+    const actions = new Set<string>();
+    for (const policy of Object.values(policies)) {
+      const statements = (
+        policy as {
+          Properties: {
+            PolicyDocument: { Statement: Array<{ Action: string | string[] }> };
+          };
+        }
+      ).Properties.PolicyDocument.Statement;
+      for (const statement of statements) {
+        const raw = statement.Action;
+        for (const action of Array.isArray(raw) ? raw : [raw]) {
+          actions.add(action);
+        }
+      }
+    }
+    return actions;
+  };
+
+  test('grants read-only DynamoDB by default when a table is set', () => {
     const app = new App();
     const stack = new Stack(app, 'TestStack');
     const table = new Table(stack, 'TestTable', {
@@ -141,6 +162,26 @@ describe('GiantsFunction', () => {
       appConfigApplication: 'example',
       entry: new URL('fixtures/handler.ts', import.meta.url).pathname,
       table,
+    });
+    const template = Template.fromStack(stack);
+    const actions = collectActions(template);
+
+    expect(actions.has('dynamodb:GetItem')).toBe(true);
+    expect(actions.has('dynamodb:PutItem')).toBe(false);
+    expect(actions.has('dynamodb:DeleteItem')).toBe(false);
+  });
+
+  test('grants DynamoDB read/write when tableAccess is "readwrite"', () => {
+    const app = new App();
+    const stack = new Stack(app, 'TestStack');
+    const table = new Table(stack, 'TestTable', {
+      partitionKey: { name: 'PK', type: AttributeType.STRING },
+    });
+    new GiantsFunction(stack, 'TestFunction', {
+      appConfigApplication: 'example',
+      entry: new URL('fixtures/handler.ts', import.meta.url).pathname,
+      table,
+      tableAccess: 'readwrite',
     });
     const template = Template.fromStack(stack);
 
@@ -157,42 +198,6 @@ describe('GiantsFunction', () => {
         ]),
       },
     });
-  });
-
-  test('grants read-only DynamoDB access when tableAccess is "read"', () => {
-    const app = new App();
-    const stack = new Stack(app, 'TestStack');
-    const table = new Table(stack, 'TestTable', {
-      partitionKey: { name: 'PK', type: AttributeType.STRING },
-    });
-    new GiantsFunction(stack, 'TestFunction', {
-      appConfigApplication: 'example',
-      entry: new URL('fixtures/handler.ts', import.meta.url).pathname,
-      table,
-      tableAccess: 'read',
-    });
-    const template = Template.fromStack(stack);
-
-    const policies = template.findResources('AWS::IAM::Policy');
-    const actions = new Set<string>();
-    for (const policy of Object.values(policies)) {
-      const doc = (
-        policy as {
-          Properties: {
-            PolicyDocument: { Statement: Array<{ Action: string | string[] }> };
-          };
-        }
-      ).Properties.PolicyDocument.Statement;
-      for (const statement of doc) {
-        const raw = statement.Action;
-        for (const action of Array.isArray(raw) ? raw : [raw]) {
-          actions.add(action);
-        }
-      }
-    }
-    expect(actions.has('dynamodb:GetItem')).toBe(true);
-    expect(actions.has('dynamodb:PutItem')).toBe(false);
-    expect(actions.has('dynamodb:DeleteItem')).toBe(false);
   });
 
   test('does not hardcode a functionName (avoids cross-stack collisions)', () => {

@@ -1,1 +1,5 @@
-export { powertoolsSecrets, type SecretsProvider } from './secrets.ts';
+export {
+  powertoolsSecrets,
+  type Schema,
+  type SecretsProvider,
+} from './secrets.ts';

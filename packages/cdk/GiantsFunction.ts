@@ -112,11 +112,14 @@ export class GiantsFunction extends NodejsFunction {
     }
 
     if (props.table) {
-      const access = props.tableAccess ?? 'readwrite';
-      if (access === 'read') {
-        props.table.grantReadData(this);
-      } else {
+      // Default to read-only — least privilege wins unless the handler
+      // actively needs to write. Opt in to 'readwrite' per-route when it
+      // does.
+      const access = props.tableAccess ?? 'read';
+      if (access === 'readwrite') {
         props.table.grantReadWriteData(this);
+      } else {
+        props.table.grantReadData(this);
       }
     }
   }

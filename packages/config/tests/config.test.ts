@@ -107,4 +107,52 @@ describe('powertoolsConfig', () => {
       expect.objectContaining({ maxAge: 30 }),
     );
   });
+
+  test('runs the raw value through an optional schema', async () => {
+    const raw = { greeting: 'hi' };
+    mockGetAppConfig.mockResolvedValueOnce(raw);
+    const schema = {
+      parse: mock((input: unknown) => input as typeof raw),
+    };
+    const result = await powertoolsConfig('example').getConfig(
+      'profile',
+      schema,
+    );
+    expect(schema.parse).toHaveBeenCalledWith(raw);
+    expect(result).toEqual(raw);
+  });
+
+  test('propagates schema parse errors', async () => {
+    mockGetAppConfig.mockResolvedValueOnce({ greeting: 42 });
+    const schema = {
+      parse: () => {
+        throw new Error('bad shape');
+      },
+    };
+    await expect(
+      powertoolsConfig('example').getConfig('profile', schema),
+    ).rejects.toThrow('bad shape');
+  });
+});
+
+describe('localConfig with schema', () => {
+  const original = process.env.CONFIG_EXAMPLE;
+
+  afterEach(() => {
+    if (original === undefined) {
+      delete process.env.CONFIG_EXAMPLE;
+    } else {
+      process.env.CONFIG_EXAMPLE = original;
+    }
+  });
+
+  test('validates via schema.parse when supplied', async () => {
+    process.env.CONFIG_EXAMPLE = JSON.stringify({ greeting: 'hi' });
+    const schema = {
+      parse: mock((input: unknown) => input as { greeting: string }),
+    };
+    const result = await localConfig().getConfig('example', schema);
+    expect(schema.parse).toHaveBeenCalledWith({ greeting: 'hi' });
+    expect(result).toEqual({ greeting: 'hi' });
+  });
 });
